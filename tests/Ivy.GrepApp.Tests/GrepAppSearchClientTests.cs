@@ -338,4 +338,43 @@ public class GrepAppSearchClientTests
             }
         };
     }
+
+    [Theory]
+    [InlineData("rust", "Rust")]
+    [InlineData("javascript", "JavaScript")]
+    [InlineData("js", "JavaScript")]
+    [InlineData("python", "Python")]
+    [InlineData("py", "Python")]
+    [InlineData("csharp", "C#")]
+    [InlineData("c#", "C#")]
+    [InlineData("typescript", "TypeScript")]
+    [InlineData("ts", "TypeScript")]
+    [InlineData("go", "Go")]
+    [InlineData("java", "Java")]
+    [InlineData("cpp", "C++")]
+    [InlineData("c++", "C++")]
+    [InlineData("UnknownLanguage", "Unknownlanguage")]
+    public async Task SearchAsync_WithLanguageNormalization_ShouldNormalizeLanguageName(string inputLanguage, string expectedLanguage)
+    {
+        // Arrange
+        var mockHttp = new MockHttpMessageHandler();
+        var expectedUrl = $"https://grep.app/api/search?q=test&f.lang={Uri.EscapeDataString(expectedLanguage)}";
+        
+        var mockedRequest = mockHttp.When(expectedUrl)
+            .Respond("application/json", JsonSerializer.Serialize(CreateMockApiResponse()));
+
+        using var httpClient = new HttpClient(mockHttp);
+        using var client = new GrepAppSearchClient(httpClient);
+        
+        var request = new SearchRequest("test")
+        {
+            Language = inputLanguage
+        };
+
+        // Act
+        await client.SearchAsync(request);
+
+        // Assert
+        mockHttp.GetMatchCount(mockedRequest).Should().Be(1);
+    }
 }

@@ -114,7 +114,7 @@ public class GrepAppSearchClient : IDisposable
 
         if (!string.IsNullOrWhiteSpace(request.Language))
         {
-            parameters["f.lang"] = request.Language;
+            parameters["f.lang"] = NormalizeLanguageName(request.Language);
         }
 
         if (!string.IsNullOrWhiteSpace(request.Repository))
@@ -334,6 +334,57 @@ public class GrepAppSearchClient : IDisposable
         }
 
         return formattedSnippet;
+    }
+
+    private static string NormalizeLanguageName(string language)
+    {
+        if (string.IsNullOrWhiteSpace(language))
+            return language;
+
+        // Convert common language names to the format expected by grep.app API
+        return language.ToLowerInvariant() switch
+        {
+            "javascript" or "js" => "JavaScript",
+            "typescript" or "ts" => "TypeScript",
+            "python" or "py" => "Python",
+            "java" => "Java",
+            "csharp" or "c#" or "cs" => "C#",
+            "cpp" or "c++" => "C++",
+            "c" => "C",
+            "go" => "Go",
+            "rust" or "rs" => "Rust",
+            "php" => "PHP",
+            "ruby" or "rb" => "Ruby",
+            "swift" => "Swift",
+            "kotlin" or "kt" => "Kotlin",
+            "scala" => "Scala",
+            "shell" or "bash" or "sh" => "Shell",
+            "powershell" or "ps1" => "PowerShell",
+            "sql" => "SQL",
+            "html" => "HTML",
+            "css" => "CSS",
+            "json" => "JSON",
+            "xml" => "XML",
+            "yaml" or "yml" => "YAML",
+            "toml" => "TOML",
+            "markdown" or "md" => "Markdown",
+            "dockerfile" => "Dockerfile",
+            "makefile" or "make" => "Makefile",
+            "r" => "R",
+            "matlab" => "MATLAB",
+            "perl" or "pl" => "Perl",
+            "lua" => "Lua",
+            "vim" => "Vim",
+            "haskell" or "hs" => "Haskell",
+            "clojure" or "clj" => "Clojure",
+            "elixir" or "ex" => "Elixir",
+            "erlang" or "erl" => "Erlang",
+            "fsharp" or "f#" or "fs" => "F#",
+            "dart" => "Dart",
+            "objective-c" or "objc" or "m" => "Objective-C",
+            "assembly" or "asm" => "Assembly",
+            _ => char.ToUpperInvariant(language[0]) + language.Substring(1).ToLowerInvariant()
+        };
     }
 
     public void Dispose()
